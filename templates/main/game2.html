@@ -1,0 +1,52 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+    Регистрация
+    {% endblock %}
+
+{% block head %}
+   <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+{% endblock %}
+{% block body %}
+    <div style="text-align:center"><h1>Fortune Teller DApp</h1>
+    <button id="get-prediction">Get Prediction</button>
+    <p id="prediction">Your prediction will appear here...</p></div>
+
+    <script>
+        // Проверка наличия провайдера эфира, например, MetaMask
+        if (typeof window.ethereum !== 'undefined') {
+            // Создание экземпляра web3
+            const web3 = new Web3(window.ethereum);
+
+            // Запрос пользователя на подключение кошелька
+            window.ethereum.request({ method: 'eth_requestAccounts' })
+                .then(() => {
+                    console.log('Connected');
+                    // Адрес контракта
+                    const contractAddress = '0x369eEad915f319C5f40eB3B9a6ecb60faff026Ac';
+                    // ABI контракта
+                    const abi = [{
+                        "inputs": [],
+                        "name": "getPrediction",
+                        "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+                        "stateMutability": "view",
+                        "type": "function"
+                    }];
+
+                    // Создание экземпляра контракта
+                    const contract = new web3.eth.Contract(abi, contractAddress);
+
+                    document.getElementById('get-prediction').addEventListener('click', function() {
+                        contract.methods.getPrediction().call()
+                            .then(function(result) {
+                                document.getElementById('prediction').innerText = result;
+                            })
+                            .catch((err) => console.error('Failed to fetch prediction:', err));
+                    });
+                })
+                .catch((err) => console.error('Error connecting:', err));
+        } else {
+            alert('Please install MetaMask!');
+        }
+    </script>
+{% endblock %}
